@@ -63,9 +63,10 @@ svg{width:100%;height:auto;display:block}
 <div class="card hide" id="entry">
 <p class="mini" style="margin:0 0 4px" id="lastinfo"></p>
 <p class="lbl" style="margin-top:8px">3. 무게와 횟수 (무게 0은 맨몸)</p>
-<div class="row"><span class="name">무게</span><button class="sq" id="wm">−</button><input type="number" id="w" inputmode="decimal" step="0.5" value="0"><button class="sq" id="wp">+</button></div>
-<div class="row"><span class="name">횟수</span><button class="sq" id="rm">−</button><input type="number" id="r" inputmode="numeric" value="10"><button class="sq" id="rp">+</button></div>
-<p class="lbl" style="margin-top:12px">무게 증감 단위 (kg)</p><div class="chips" id="steps"></div>
+<div class="row" id="wrow"><span class="name" id="wname">무게</span><button class="sq" id="wm">−</button><input type="number" id="w" inputmode="decimal" step="0.5" value="0"><button class="sq" id="wp">+</button></div>
+<div class="row" id="rrow"><span class="name">횟수</span><button class="sq" id="rm">−</button><input type="number" id="r" inputmode="numeric" value="10"><button class="sq" id="rp">+</button></div>
+<div class="row hide" id="crow"><span class="name">시간</span><input type="number" id="cm" inputmode="numeric" value="10"><span>분</span><input type="number" id="cs" inputmode="numeric" value="0"><span>초</span></div>
+<p class="lbl" id="stl" style="margin-top:12px">무게 증감 단위 (kg)</p><div class="chips" id="steps"></div>
 
 <button class="go" id="add">세트 기록</button>
 <div id="todaysets" style="margin-top:10px"></div>
@@ -89,8 +90,8 @@ svg{width:100%;height:auto;display:block}
 
 
 <script>
-const PARTS=["가슴","등","어깨","하체","이두","삼두","복근"];
-const BASE={가슴:["벤치프레스","인클라인 벤치프레스","펙토럴 플라이","딥스","케이블 플라이"],등:["턱걸이","랫풀다운","시티드 로우","벤트오버 로우"],어깨:["덤벨 숄더 프레스","바벨 숄더 프레스","사이드 레터럴 레이즈","리어델트 머신","벤트오버 리어델트 플라이"],하체:["바벨 스쿼트","불가리안 스플릿 스쿼트","레그 익스텐션","레그프레스","레그 컬"],이두:["바벨 컬","바이셉스 컬 머신","덤벨 해머컬"],삼두:["라잉 트라이셉스 익스텐션","케이블 푸시다운","오버헤드 익스텐션"],복근:["윗몸 일으키기","레그레이즈","케이블 크런치"]};
+const PARTS=["가슴","등","어깨","하체","이두","삼두","복근","유산소"];
+const BASE={가슴:["벤치프레스","인클라인 벤치프레스","펙토럴 플라이","딥스","케이블 플라이"],등:["턱걸이","랫풀다운","시티드 로우","벤트오버 로우"],어깨:["덤벨 숄더 프레스","바벨 숄더 프레스","사이드 레터럴 레이즈","리어델트 머신","벤트오버 리어델트 플라이"],하체:["바벨 스쿼트","불가리안 스플릿 스쿼트","레그 익스텐션","레그프레스","레그 컬"],이두:["바벨 컬","바이셉스 컬 머신","덤벨 해머컬"],삼두:["라잉 트라이셉스 익스텐션","케이블 푸시다운","오버헤드 익스텐션"],복근:["윗몸 일으키기","레그레이즈","케이블 크런치"],유산소:["런닝머신","천국의 계단","사이클","걷기"]};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const LS="workoutlog.v1";
@@ -98,6 +99,10 @@ let S={sets:[],custom:[]},part=null,ex=null,step=2.5,rest=40,metric="r",per=0,db
 try{const j=JSON.parse(localStorage.getItem(LS)||"null");if(j&&j.sets)S=j}catch(e){}
 const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const fmt=(w,r)=>(w?w+"kg×":"맨몸×")+r;
+const unit=e=>/계단/.test(e||"")?"층":"km";
+const mmss=r=>Math.floor(r/60)+"분"+(r%60?" "+r%60+"초":"");
+const fmtS=s=>s.p==="유산소"?(s.w?s.w+unit(s.e)+", ":"")+mmss(s.r):fmt(s.w,s.r);
+const stp=()=>part==="유산소"?(unit(ex)==="층"?1:0.1):step;
 const save=()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}};
 const col=()=>db.collection("data/users/"+uid);
 function setSync(){$("#sync").textContent=db?"계정에 저장 중":"이 기기에만 저장"}
@@ -128,15 +133,15 @@ function renderEx(){
 }
 function fillDefaults(){
   const td=S.sets.filter(s=>s.e===ex&&s.d===today());const src=td.length?td[td.length-1]:(last(ex)||[]).slice(-1)[0];
-  $("#w").value=src?src.w:0;$("#r").value=src?src.r:10;
+  $("#w").value=src?src.w:0;$("#r").value=src?src.r:10;if(part==="유산소"){const sec=src?src.r:600;$("#cm").value=Math.floor(sec/60);$("#cs").value=sec%60}
 }
 function renderEntry(){
-  if(!ex)return;const l=last(ex);
-  $("#lastinfo").textContent=l?`지난번(${l[0].d.slice(5)}): `+l.map(s=>fmt(s.w,s.r)).join(", "):"이 운동은 아직 기록이 없습니다.";
+  if(!ex)return;const cd=part==="유산소";$("#rrow").classList.toggle("hide",cd);$("#crow").classList.toggle("hide",!cd);$("#stl").classList.toggle("hide",cd);$("#steps").classList.toggle("hide",cd);$("#wname").textContent=cd?(unit(ex)==="층"?"층수":"거리(km)"):"무게";const l=last(ex);
+  $("#lastinfo").textContent=l?`지난번(${l[0].d.slice(5)}): `+l.map(s=>fmtS(s)).join(", "):"이 운동은 아직 기록이 없습니다.";
   chips($("#steps"),[1,2.5,5].map(v=>({v,label:String(v)})),step,v=>{step=v;renderEntry()});
   
   const td=S.sets.filter(s=>s.e===ex&&s.d===today());
-  $("#todaysets").innerHTML=td.map((s,i)=>`<div class="set"><span>${i+1}세트&nbsp; <b>${fmt(s.w,s.r)}</b></span><button data-t="${s.t}" aria-label="삭제">×</button></div>`).join("");
+  $("#todaysets").innerHTML=td.map((s,i)=>`<div class="set"><span>${i+1}세트&nbsp; <b>${fmtS(s)}</b></span><button data-t="${s.t}" aria-label="삭제">×</button></div>`).join("");
   $("#todaysets").querySelectorAll("button").forEach(b=>b.onclick=()=>del(+b.dataset.t));
 }
 function renderSum(){
@@ -146,7 +151,7 @@ function renderSum(){
 }
 function del(t){const s=S.sets.find(x=>x.t===t);if(!s)return;S.sets=S.sets.filter(x=>x.t!==t);save();writeMonth(s.d.slice(0,7));renderAll()}
 function add(){
-  const w=Math.max(0,parseFloat($("#w").value)||0),r=parseInt($("#r").value)||0;
+  const cd=part==="유산소";const w=Math.max(0,parseFloat($("#w").value)||0),r=cd?(parseInt($("#cm").value)||0)*60+(parseInt($("#cs").value)||0):(parseInt($("#r").value)||0);
   if(r<1){$("#r").focus();return}
   const s={t:Date.now(),d:today(),p:part,e:ex,w,r};S.sets.push(s);save();writeMonth(s.d.slice(0,7));renderAll();
 }
@@ -159,11 +164,11 @@ function startRest(){endAt=Date.now()+rest*1000;$("#timer").classList.add("on");
 function renderTrend(){
   const names=[...new Set(S.sets.map(s=>s.e))];const sel=$("#cx");const cur=sel.value;
   sel.innerHTML=names.map(n=>`<option ${n===cur?"selected":""}>${esc(n)}</option>`).join("");
-  chips($("#mets"),[{v:"r",label:"총 반복수"},{v:"v",label:"볼륨(kg×횟수)"},{v:"m",label:"최고 무게"}],metric,v=>{metric=v;renderTrend()});
+  const e0=sel.value||names[0],cdo=!!e0&&S.sets.some(s=>s.e===e0&&s.p==="유산소");chips($("#mets"),cdo?[{v:"r",label:"총 시간(분)"},{v:"v",label:"총 거리"},{v:"m",label:"분/거리 (낮을수록 빠름)"}]:[{v:"r",label:"총 반복수"},{v:"v",label:"볼륨(kg×횟수)"},{v:"m",label:"최고 무게"}],metric,v=>{metric=v;renderTrend()});
   chips($("#pers"),[{v:28,label:"4주"},{v:56,label:"8주"},{v:0,label:"전체"}],per,v=>{per=v;renderTrend()});
   if(!names.length){$("#chart").innerHTML='<p class="mini">기록이 쌓이면 여기에 그래프가 나옵니다.</p>';$("#cvals").textContent="";return}
   const e=sel.value||names[0];const by={};const pd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");const cut=per?pd(new Date(Date.now()-per*864e5)):"";const wkOf=s=>{const d=new Date(s+"T00:00:00");d.setDate(d.getDate()-(d.getDay()+6)%7);return pd(d)};const wk={};S.sets.filter(s=>s.e===e).forEach(s=>{const k=wkOf(s.d);(wk[k]=wk[k]||{d:new Set(),n:0}).d.add(s.d);wk[k].n++});const thisWk=wkOf(today());$("#wk").innerHTML='<p class="lbl">주별 횟수 ('+esc(e)+', 월요일 시작)</p>'+Object.keys(wk).sort().reverse().slice(0,8).map(k=>`<div class="set"><span>${k===thisWk?"이번 주":k.slice(5)+" 주"}</span><b>${wk[k].d.size}일, ${wk[k].n}세트</b></div>`).join("");
-  S.sets.filter(s=>s.e===e&&s.d>=cut).forEach(s=>{by[s.d]=metric==="r"?(by[s.d]||0)+s.r:metric==="v"?(by[s.d]||0)+s.w*s.r:Math.max(by[s.d]||0,s.w)});
+  const cdo2=S.sets.some(s=>s.e===e&&s.p==="유산소");if(cdo2){const A={};S.sets.filter(s=>s.e===e&&s.d>=cut).forEach(s=>{const a=A[s.d]||(A[s.d]={t:0,k:0});a.t+=s.r;a.k+=s.w});Object.keys(A).forEach(d=>{const a=A[d];by[d]=metric==="r"?Math.round(a.t/6)/10:metric==="v"?Math.round(a.k*10)/10:(a.k?Math.round(a.t/60/a.k*100)/100:0)})}else S.sets.filter(s=>s.e===e&&s.d>=cut).forEach(s=>{by[s.d]=metric==="r"?(by[s.d]||0)+s.r:metric==="v"?(by[s.d]||0)+s.w*s.r:Math.max(by[s.d]||0,s.w)});
   const ds=Object.keys(by).sort(),vs=ds.map(d=>by[d]);if(!ds.length){$("#chart").innerHTML='<p class="mini">이 기간에는 기록이 없습니다.</p>';$("#cvals").textContent="";return}
   const W=320,H=190,L=34,R=12,T=16,B=26,mx=Math.max(...vs,1),mn=0;
   const X=i=>ds.length===1?(L+W-R)/2:L+i*(W-L-R)/(ds.length-1),Y=v=>T+(H-T-B)*(1-(v-mn)/(mx-mn||1));
@@ -179,10 +184,10 @@ function renderTrend(){
 function renderHist(){
   const ds=[...new Set(S.sets.map(s=>s.d))].sort().reverse();
   $("#days").innerHTML=ds.length?ds.map(d=>{const day=S.sets.filter(s=>s.d===d),ex=[...new Set(day.map(s=>s.e))];
-    return `<div class="card day"><h3>${d}  (${day.length}세트)</h3>`+ex.map(e=>{const ss=day.filter(s=>s.e===e);return `<p><b>${esc(e)}</b> ${ss.map(s=>fmt(s.w,s.r)).join(", ")}  (합계 ${ss.reduce((a,s)=>a+s.r,0)}회)</p>`}).join("")+"</div>"}).join(""):'<p class="mini">아직 기록이 없습니다.</p>';
+    return `<div class="card day"><h3>${d}  (${day.length}세트)</h3>`+ex.map(e=>{const ss=day.filter(s=>s.e===e);return `<p><b>${esc(e)}</b> ${ss.map(s=>fmtS(s)).join(", ")}  (${ss[0].p==="유산소"?"합계 "+mmss(ss.reduce((a,s)=>a+s.r,0)):"합계 "+ss.reduce((a,s)=>a+s.r,0)+"회"})</p>`}).join("")+"</div>"}).join(""):'<p class="mini">아직 기록이 없습니다.</p>';
 }
 $("#csv").onclick=async()=>{
-  const rows=[["날짜","부위","운동","무게(kg)","횟수"],...S.sets.map(s=>[s.d,s.p,s.e,s.w,s.r])];
+  const rows=[["날짜","부위","운동","무게(kg) 또는 거리","횟수 또는 초(유산소)"],...S.sets.map(s=>[s.d,s.p,s.e,s.w,s.r])];
   const text="\ufeff"+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(",")).join("\n");
   try{const d=await claude.use("downloads");if(d){await d.save({filename:"운동일지.csv",data:new Blob([text],{type:"text/csv"})});$("#csvmsg").textContent="저장했습니다.";return}}catch(e){}
   dl(text,"운동일지.csv","text/csv");$("#csvmsg").textContent="CSV 파일을 저장했습니다.";
@@ -193,7 +198,7 @@ $("#ex").onchange=e=>{const v=e.target.value;if(v==="__new"){$("#newbox").classL
 $("#nxb").onclick=()=>{const n=$("#nx").value.trim();if(!n)return;if(!S.custom.some(c=>c.p===part&&c.e===n)&&!BASE[part].includes(n)){S.custom.push({p:part,e:n});save();writeCfg()}
   $("#nx").value="";$("#newbox").classList.add("hide");ex=n;fillDefaults();renderAll()};
 const nudge=(id,d,min)=>{const el=$(id);el.value=Math.max(min,Math.round((parseFloat(el.value||0)+d)*100)/100)};
-$("#wm").onclick=()=>nudge("#w",-step,0);$("#wp").onclick=()=>nudge("#w",step,0);
+$("#wm").onclick=()=>nudge("#w",-stp(),0);$("#wp").onclick=()=>nudge("#w",stp(),0);
 $("#rm").onclick=()=>nudge("#r",-1,0);$("#rp").onclick=()=>nudge("#r",1,0);
 $("#add").onclick=add;
 $("#cx").onchange=renderTrend;
