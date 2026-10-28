@@ -52,6 +52,7 @@ svg{width:100%;height:auto;display:block}
 
 <section id="v-log">
 <div class="card"><p class="lbl">오늘 요약</p><div id="sum" class="mini" style="margin:0;color:var(--ink)"></div></div>
+<div class="card hide" id="qk"><p class="lbl">오늘 한 운동 (눌러서 이어서 기록)</p><div class="chips" id="qkc"></div></div>
 <div class="card">
 <p class="lbl">1. 부위</p><div class="chips" id="parts"></div>
 <div id="exbox" class="hide">
@@ -206,11 +207,18 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",String(x===b)));
   ["log","trend","hist"].forEach(t=>$("#v-"+t).classList.toggle("hide",t!==b.dataset.t));
   if(b.dataset.t==="trend")renderTrend();if(b.dataset.t==="hist")renderHist()});
-function renderAll(){$("#today").textContent=today();renderParts();renderEx();renderEntry();renderSum()}
+function renderAll(){saveSel();$("#today").textContent=today();renderParts();renderEx();renderEntry();renderSum();renderQuick()}
 
 function dl(text,name,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();a.remove()}
 $("#bk").onclick=()=>{dl(JSON.stringify(S),"운동일지-백업-"+today()+".json","application/json");$("#csvmsg").textContent="백업 파일을 저장했습니다. 폰을 바꾸거나 브라우저 데이터를 지우기 전에 꼭 저장해 두세요."};
 $("#rsb").onclick=()=>$("#rs").click();
 $("#rs").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());const have=new Set(S.sets.map(s=>s.t));let n=0;(j.sets||[]).forEach(s=>{if(!have.has(s.t)){S.sets.push(s);have.add(s.t);n++}});(j.custom||[]).forEach(c=>{if(!S.custom.some(k=>k.p===c.p&&k.e===c.e))S.custom.push(c)});S.sets.sort((a,b)=>a.t-b.t);save();renderAll();$("#csvmsg").textContent=n+"세트를 불러왔습니다."}catch(err){$("#csvmsg").textContent="불러오지 못했습니다. 백업 파일이 맞는지 확인하세요."}e.target.value=""};
+const SEL="workoutlog.sel";
+function saveSel(){try{localStorage.setItem(SEL,JSON.stringify({d:today(),part,ex}))}catch(e){}}
+function pick(p,e){part=p;ex=e;fillDefaults();renderAll()}
+function renderQuick(){const seen=[];S.sets.filter(s=>s.d===today()).forEach(s=>{if(!seen.some(x=>x.e===s.e))seen.push({p:s.p,e:s.e})});
+  $("#qk").classList.toggle("hide",!seen.length);const el=$("#qkc");el.innerHTML="";
+  seen.forEach(x=>{const b=document.createElement("button");b.className="chip";b.textContent=x.e;b.setAttribute("aria-pressed",String(x.e===ex));b.onclick=()=>pick(x.p,x.e);el.appendChild(b)})}
+try{const q=JSON.parse(localStorage.getItem(SEL)||"null");if(q&&q.d===today()&&PARTS.includes(q.part)){part=q.part;if(q.ex&&exList(part).includes(q.ex)){ex=q.ex;fillDefaults()}}}catch(e){}
 setSync();renderAll();
 </script></body></html>
