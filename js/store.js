@@ -1,7 +1,7 @@
 // 상태와 저장. 기록 형식(S)을 바꿀 때는 DATA_VERSION을 올리고 migrate()에 변환을 추가하세요.
-const LS="workoutlog.v1",SEL="workoutlog.sel",DATA_VERSION=2;
-let S={v:DATA_VERSION,sets:[],custom:[]},part=null,ex=null,step=2.5,metric="r",per=0;
-function migrate(){if(!S.v)S.v=1;/* if(S.v<3){...변환...;S.v=3} */S.v=DATA_VERSION;S.sets=S.sets||[];S.custom=S.custom||[]}
+const LS="workoutlog.v1",SEL="workoutlog.sel",DATA_VERSION=3;
+let S={v:DATA_VERSION,sets:[],custom:[],days:{}},part=null,ex=null,step=2.5,metric="r",per=0;
+function migrate(){if(!S.v)S.v=1;if(S.v<3){S.days=S.days||{}}/* 다음 버전: if(S.v<4){...변환...} */S.v=DATA_VERSION;S.sets=S.sets||[];S.custom=S.custom||[];S.days=S.days||{}}
 try{const j=JSON.parse(localStorage.getItem(LS)||"null");if(j&&j.sets){S=j;migrate()}}catch(e){}
 const save=()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){}};
 const exList=p=>[...new Set([...(BASE[p]||[]),...S.custom.filter(c=>c.p===p).map(c=>c.e)])];

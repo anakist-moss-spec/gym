@@ -37,3 +37,5 @@ svg{width:100%;height:auto;display:block}
 .cmp .up{color:#1a9a5c;font-weight:700}
 .cmp .dn{color:var(--bad);font-weight:700}
 .goal{font-size:14px;color:var(--acc);font-weight:700;margin:0 0 8px}
+#sum{white-space:pre-line}
+.big{font-size:18px;margin:2px 0 10px}
