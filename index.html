@@ -5,7 +5,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2446e8">
 <link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E🏋️%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body><main>
 <h1>운동일지</h1>
@@ -14,6 +14,7 @@
 <button role="tab" data-t="log" aria-selected="true">기록</button>
 <button role="tab" data-t="trend" aria-selected="false">추이</button>
 <button role="tab" data-t="hist" aria-selected="false">내역</button>
+<button role="tab" data-t="manage" aria-selected="false">운동</button>
 </div>
 
 <section id="v-log">
@@ -50,6 +51,7 @@
 </div>
 </section>
 
+<section id="v-manage" class="hide"><div id="mg"></div></section>
 <section id="v-hist" class="hide">
 <div class="card"><button class="ghost" id="csv">CSV로 내보내기 (엑셀, 구글 시트)</button><button class="ghost" id="bk" style="margin-top:8px">백업 파일 저장 (JSON)</button><button class="ghost" id="rsb" style="margin-top:8px">백업 파일 불러오기</button><input type="file" id="rs" accept=".json,application/json" class="hide"><p class="mini" id="csvmsg">내보내기는 선택 사항입니다. 기록은 이 앱에 계속 쌓입니다.</p></div>
 <div id="days"></div>
@@ -57,11 +59,12 @@
 </main>
 
 
-<script src="js/catalog.js?v=5"></script>
-<script src="js/util.js?v=5"></script>
-<script src="js/store.js?v=5"></script>
-<script src="js/views/log.js?v=5"></script>
-<script src="js/views/trend.js?v=5"></script>
-<script src="js/views/history.js?v=5"></script>
-<script src="js/main.js?v=5"></script>
+<script src="js/catalog.js?v=6"></script>
+<script src="js/util.js?v=6"></script>
+<script src="js/store.js?v=6"></script>
+<script src="js/views/log.js?v=6"></script>
+<script src="js/views/trend.js?v=6"></script>
+<script src="js/views/history.js?v=6"></script>
+<script src="js/views/manage.js?v=6"></script>
+<script src="js/main.js?v=6"></script>
 </body></html>

@@ -37,7 +37,7 @@ function renderQuick(){const seen=[];S.sets.filter(s=>s.d===today()).forEach(s=>
   seen.forEach(x=>{const b=document.createElement("button");b.className="chip";b.textContent=x.e;b.setAttribute("aria-pressed",String(x.e===ex));b.onclick=()=>pick(x.p,x.e);el.appendChild(b)})}
 $("#ex").onchange=e=>{const v=e.target.value;if(v==="__new"){$("#newbox").classList.remove("hide");$("#nx").focus();ex=null;$("#entry").classList.add("hide");return}
   $("#newbox").classList.add("hide");ex=v||null;if(ex)fillDefaults();renderAll()};
-$("#nxb").onclick=()=>{const n=$("#nx").value.trim();if(!n)return;if(!S.custom.some(c=>c.p===part&&c.e===n)&&!BASE[part].includes(n)){S.custom.push({p:part,e:n});save();}
+$("#nxb").onclick=()=>{const n=$("#nx").value.trim();if(!n)return;S.hidden=S.hidden.filter(h=>h!==n);if(!S.custom.some(c=>c.p===part&&c.e===n)&&!BASE[part].includes(n)){S.custom.push({p:part,e:n});save();}
   $("#nx").value="";$("#newbox").classList.add("hide");ex=n;fillDefaults();renderAll()};
 $("#wm").onclick=()=>nudge("#w",-stp(),0);$("#wp").onclick=()=>nudge("#w",stp(),0);
 $("#rm").onclick=()=>nudge("#r",-1,0);$("#rp").onclick=()=>nudge("#r",1,0);
