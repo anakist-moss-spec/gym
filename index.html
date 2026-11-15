@@ -5,7 +5,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2446e8">
 <link rel="apple-touch-icon" href="icons/icon-192.png"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E🏋️%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body><main>
 <h1>운동일지</h1>
@@ -19,6 +19,7 @@
 
 <section id="v-log">
 <div class="card" id="daycard"></div>
+<div class="card" id="rt"></div>
 <div class="card"><p class="lbl">오늘 요약</p><div id="sum" class="mini" style="margin:0;color:var(--ink)"></div><button class="ghost" id="shr" style="margin-top:10px">오늘 운동 공유하기</button><p class="mini" id="shrmsg" style="margin:6px 0 0"></p></div>
 <div class="card hide" id="qk"><p class="lbl">오늘 한 운동 (눌러서 이어서 기록)</p><div class="chips" id="qkc"></div></div>
 <div class="card">
@@ -35,6 +36,8 @@
 <div class="row" id="wrow"><span class="name" id="wname">무게</span><button class="sq" id="wm">−</button><input type="number" id="w" inputmode="decimal" step="0.5" value="0"><button class="sq" id="wp">+</button></div>
 <div class="row" id="rrow"><span class="name">횟수</span><button class="sq" id="rm">−</button><input type="number" id="r" inputmode="numeric" value="10"><button class="sq" id="rp">+</button></div>
 <div class="row hide" id="crow"><span class="name">시간</span><input type="number" id="cm" inputmode="numeric" value="10"><span>분</span><input type="number" id="cs" inputmode="numeric" value="0"><span>초</span></div>
+<div class="row"><span class="name">메모</span><input type="text" id="nt" placeholder="이번 세트 메모 (예: 케이블 4칸)"></div>
+<div class="row"><span class="name">운동</span><input type="text" id="xn" placeholder="이 운동 고정 메모 (자리, 그립 등)"></div>
 <p class="lbl" id="stl" style="margin-top:12px">무게 증감 단위 (kg)</p><div class="chips" id="steps"></div>
 
 <button class="go" id="add">세트 기록</button>
@@ -59,12 +62,13 @@
 </main>
 
 
-<script src="js/catalog.js?v=6"></script>
-<script src="js/util.js?v=6"></script>
-<script src="js/store.js?v=6"></script>
-<script src="js/views/log.js?v=6"></script>
-<script src="js/views/trend.js?v=6"></script>
-<script src="js/views/history.js?v=6"></script>
-<script src="js/views/manage.js?v=6"></script>
-<script src="js/main.js?v=6"></script>
+<script src="js/catalog.js?v=7"></script>
+<script src="js/util.js?v=7"></script>
+<script src="js/store.js?v=7"></script>
+<script src="js/views/log.js?v=7"></script>
+<script src="js/views/routine.js?v=7"></script>
+<script src="js/views/trend.js?v=7"></script>
+<script src="js/views/history.js?v=7"></script>
+<script src="js/views/manage.js?v=7"></script>
+<script src="js/main.js?v=7"></script>
 </body></html>

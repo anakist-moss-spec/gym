@@ -9,11 +9,11 @@ function renderEx(){
 function fillDefaults(){
   const td=S.sets.filter(s=>s.e===ex&&s.d===today()),lv=last(ex)||[],i=td.length,same=lv[i]||null,prev=td.length?td[td.length-1]:null;
   const w=prev?prev.w:(same?same.w:(lv.length?lv[lv.length-1].w:0)),r=same?same.r:(prev?prev.r:(part==="유산소"?600:10));
-  touched=false;$("#w").value=w;$("#r").value=r;if(part==="유산소"){$("#cm").value=Math.floor(r/60);$("#cs").value=r%60}
+  touched=false;$("#nt").value=prev?(prev.m||""):(same?(same.m||""):"");$("#w").value=w;$("#r").value=r;if(part==="유산소"){$("#cm").value=Math.floor(r/60);$("#cs").value=r%60}
 }
 function renderEntry(){
   if(!ex)return;const cd=part==="유산소";$("#rrow").classList.toggle("hide",cd);$("#crow").classList.toggle("hide",!cd);$("#stl").classList.toggle("hide",cd);$("#steps").classList.toggle("hide",cd);$("#wname").textContent=cd?(unit(ex)==="층"?"층수":"거리(km)"):"무게";const l=last(ex);
-  renderCompare();
+  renderCompare();if(document.activeElement!==$("#xn"))$("#xn").value=S.exnotes[ex]||"";
   chips($("#steps"),[1,2.5,5].map(v=>({v,label:String(v)})),step,v=>{step=v;renderEntry()});
   
   const td=S.sets.filter(s=>s.e===ex&&s.d===today());
@@ -29,7 +29,7 @@ function del(t){const s=S.sets.find(x=>x.t===t);if(!s)return;S.sets=S.sets.filte
 function add(){
   const cd=part==="유산소";const w=Math.max(0,parseFloat($("#w").value)||0),r=cd?(parseInt($("#cm").value)||0)*60+(parseInt($("#cs").value)||0):(parseInt($("#r").value)||0);
   if(r<1){$("#r").focus();return}
-  const s={t:Date.now(),d:today(),p:part,e:ex,w,r};S.sets.push(s);if(S.days[s.d]&&S.days[s.d].end&&s.t>S.days[s.d].end)delete S.days[s.d].end;save();fillDefaults();renderAll();
+  const s={t:Date.now(),d:today(),p:part,e:ex,w,r},m=$("#nt").value.trim();if(m)s.m=m;S.sets.push(s);if(S.days[s.d]&&S.days[s.d].end&&s.t>S.days[s.d].end)delete S.days[s.d].end;save();fillDefaults();renderAll();
 }
 function pick(p,e){part=p;ex=e;fillDefaults();renderAll()}
 function renderQuick(){const seen=[];S.sets.filter(s=>s.d===today()).forEach(s=>{if(!seen.some(x=>x.e===s.e))seen.push({p:s.p,e:s.e})});
@@ -48,7 +48,7 @@ function cur(){const cd=part==="유산소";return{w:Math.max(0,parseFloat($("#w"
 function renderCompare(){
   const box=$("#cmp");if(!ex){box.innerHTML="";return}
   const cd=part==="유산소",lv=last(ex)||[],td=S.sets.filter(s=>s.e===ex&&s.d===today()),c=cur(),n=Math.max(lv.length,td.length+1);
-  const val=s=>cd?mmss(s.r):(s.w?s.w+"kg×"+s.r:""+s.r);
+  const val=s=>(cd?mmss(s.r):(s.w?s.w+"kg×"+s.r:""+s.r))+(s.m?" ("+s.m+")":"");
   const dif=(a,b)=>{if(!a||!b||cd)return"";if(a.w!==b.w){const d=Math.round((b.w-a.w)*10)/10;return`<span class="${d>0?"up":"dn"}">${d>0?"+":""}${d}kg</span>`}const d=b.r-a.r;return`<span class="${d>0?"up":d<0?"dn":""}">${d>0?"+"+d:d<0?d:"="}</span>`};
   const sum=a=>a.reduce((t,s)=>t+s.r,0),tot=x=>cd?mmss(x):x+"회";
   let h=lv.length?"":'<p class="mini" style="margin:0 0 6px">이 운동은 아직 지난번 기록이 없습니다.</p>';
@@ -90,3 +90,4 @@ function renderDay(){
   if($("#dend"))$("#dend").onclick=()=>set(o=>{o.end=Date.now()});
   if($("#dopen"))$("#dopen").onclick=()=>set(o=>{delete o.end});
 }
+$("#xn").addEventListener("change",()=>{if(!ex)return;const v=$("#xn").value.trim();if(v)S.exnotes[ex]=v;else delete S.exnotes[ex];save()});

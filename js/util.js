@@ -5,7 +5,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth
 const fmt=(w,r)=>(w?w+"kg×":"맨몸×")+r;
 const unit=e=>/계단/.test(e||"")?"층":"km";
 const mmss=r=>Math.floor(r/60)+"분"+(r%60?" "+r%60+"초":"");
-const fmtS=s=>s.p==="유산소"?(s.w?s.w+unit(s.e)+", ":"")+mmss(s.r):fmt(s.w,s.r);
+const fmtS=s=>(s.p==="유산소"?(s.w?s.w+unit(s.e)+", ":"")+mmss(s.r):(s.w?s.w+"kg×"+s.r:(s.m?""+s.r:"맨몸×"+s.r)))+(s.m?" ("+s.m+")":"");
 const stp=()=>part==="유산소"?(unit(ex)==="층"?1:0.1):step;
 function chips(el,items,cur,fn){el.innerHTML="";items.forEach(it=>{const b=document.createElement("button");b.className="chip";b.textContent=it.label;b.setAttribute("aria-pressed",String(it.v===cur));b.onclick=()=>fn(it.v);el.appendChild(b)})}
 const nudge=(id,d,min)=>{const el=$(id);el.value=Math.max(min,Math.round((parseFloat(el.value||0)+d)*100)/100);el.dispatchEvent(new Event("input",{bubbles:true}))};
@@ -13,7 +13,7 @@ function dl(text,name,type){const a=document.createElement("a");a.href=URL.creat
 // 시간 계산: 날짜별 시작/마감 버튼(S.days)과 세트 기록 시각(t)을 사용합니다.
 // 가져오기로 넣은 기록(1분 간격의 가짜 시각)은 계산에서 제외합니다.
 const hm=t=>{const d=new Date(t);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};
-const mins=ms=>{const m=Math.round(ms/60000);return m<1?"1분 미만":m+"분"};
+const mins=ms=>{const m=Math.round(ms/60000);if(m<1)return"1분 미만";const h=Math.floor(m/60),r=m%60;return h?h+"시간"+(r?" "+r+"분":""):m+"분"};
 const fake=ss=>ss.length>1&&ss.every((s,i)=>i===0||s.t-ss[i-1].t===60000);
 const daySets=d=>S.sets.filter(s=>s.d===d).sort((a,b)=>a.t-b.t);
 // 하루 운동 시간: 시작 버튼 없으면 첫 세트 시각, 마감 버튼 없으면 마지막 세트 시각을 대신 사용

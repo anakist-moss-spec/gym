@@ -7,6 +7,8 @@ function renameEx(old,nw,np){
   if(!nw||!BASE[np])return;
   const wasBase=PARTS.some(p=>BASE[p].includes(old));
   S.sets.forEach(s=>{if(s.e===old){s.e=nw;s.p=np}});
+  Object.values(S.routines).concat(Object.values(S.plans)).forEach(l=>l.forEach(it=>{if(it.e===old){it.e=nw;it.p=np}}));
+  if(nw!==old&&S.exnotes[old]!==undefined){S.exnotes[nw]=S.exnotes[nw]||S.exnotes[old];delete S.exnotes[old]}
   S.custom=S.custom.filter(c=>c.e!==old&&c.e!==nw);
   const sameBase=nw===old&&BASE[np].includes(old);
   if(wasBase&&!sameBase&&!S.hidden.includes(old))S.hidden.push(old);
